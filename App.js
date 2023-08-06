@@ -1,21 +1,30 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import auth from '@react-native-firebase/auth';
+import { NavigationContainer } from '@react-navigation/native';
+import AuthAfterNav from './navigators/AuthAfterNav';
+import AuthBeforeNav from './navigators/AuthBeforeNav';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+const queryClient = new QueryClient;
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    const [isAuthentication, setIsAuthentication] = useState(false); 
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    useEffect(() => {
+        auth().onAuthStateChanged((user) => {
+            if(user) {
+                setIsAuthentication(true);
+            } else {
+                setIsAuthentication(false);
+            }
+        })
+    }, []);
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <NavigationContainer>
+                {isAuthentication ? <AuthAfterNav /> : <AuthBeforeNav />}
+            </NavigationContainer>
+        </QueryClientProvider>
+    );
+}; 
